@@ -1,4 +1,4 @@
-////////////NEW CODE////////////////
+// ////////////NEW CODE////////////////
 // import express from "express";
 // import { defaultConfig } from "../config.js";
 // import { crawl } from "./core.js";
@@ -7,6 +7,7 @@
 // import { createServer } from "http";
 
 // let writeServer: any; // Declare a variable to hold the write server instance
+// let combinedData: Record<string, any>[] = []; // Declare the combinedData variable
 
 // const app = express();
 // const port = 4000;
@@ -25,8 +26,9 @@
 //     await crawl(req.body);
 //     await write();
 
-//     // Send a response
-//     res.status(200).json({ message: "API request processed successfully" });
+//     // Send the combinedData as the response
+//     res.setHeader("Content-Type", "application/json");
+//     res.end(JSON.stringify(combinedData));
 //   } catch (error) {
 //     console.error("Error processing API request:", error);
 //     res.status(500).json({ error: "Internal server error" });
@@ -43,7 +45,7 @@
 //     absolute: true,
 //   });
 
-//   let combinedData: Record<string, any>[] = [];
+//   combinedData = []; // Reset the combinedData variable
 
 //   for (const file of jsonFiles) {
 //     const fileContent = await readFile(file, "utf-8");
@@ -66,40 +68,40 @@
 
 //   writeServer.listen(writePort, () => {
 //     console.log(`Write server is running on port ${writePort}`);
-//   });  
+//   });
 
 //   console.log("JSON response:", JSON.stringify(combinedData));
 // }
 
-
 import express from "express";
 import { defaultConfig } from "../config.js";
 import { crawl } from "./core.js";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, unlink } from "fs/promises";
 import { glob } from "glob";
 import { createServer } from "http";
 
-let writeServer: any; // Declare a variable to hold the write server instance
-let combinedData: Record<string, any>[] = []; // Declare the combinedData variable
+let writeServer: any;
+let combinedData: Record<string, any>[] = [];
 
 const app = express();
 const port = 4000;
 
-// Middleware to parse JSON request bodies
 app.use(express.json());
 
-// Endpoint to handle the API request
 app.post("/", async (req, res) => {
   try {
-    // Handle the API request
     console.log("API request received");
     console.log("Request body:", req.body);
 
-    // Call the crawl and write functions
+    // Reset the combinedData variable for each request
+    combinedData = [];
+
+    // Delete the existing JSON files and request_queues
+    await deleteExistingData();
+
     await crawl(req.body);
     await write();
 
-    // Send the combinedData as the response
     res.setHeader("Content-Type", "application/json");
     res.end(JSON.stringify(combinedData));
   } catch (error) {
@@ -108,7 +110,6 @@ app.post("/", async (req, res) => {
   }
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
@@ -118,15 +119,13 @@ export async function write() {
     absolute: true,
   });
 
-  combinedData = []; // Reset the combinedData variable
-
   for (const file of jsonFiles) {
     const fileContent = await readFile(file, "utf-8");
     const data: Record<string, any> = JSON.parse(fileContent);
     combinedData = combinedData.concat(data);
   }
 
-  const writePort = 3000; // Use a different port for the write server
+  const writePort = 3000;
 
   if (writeServer) {
     console.log("Closing previous write server");
@@ -145,3 +144,24 @@ export async function write() {
 
   console.log("JSON response:", JSON.stringify(combinedData));
 }
+
+async function deleteExistingData() {
+  const jsonFiles = await glob("storage/datasets/default/*.json", {
+    absolute: true,
+  });
+
+  for (const file of jsonFiles) {
+    await unlink(file);
+    console.log(`Deleted file: ${file}`);
+  }
+
+  const requestQueueFiles = await glob("storage/request_queues/default/*.json", {
+    absolute: true,
+  });
+
+  for (const file of requestQueueFiles) {
+    await unlink(file);
+    console.log(`Deleted file: ${file}`);
+  }
+}
+

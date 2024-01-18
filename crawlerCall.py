@@ -2,7 +2,7 @@ import requests
 
 def make_api_call(url, match, max_pages_to_crawl, output_file_name):
     try:
-        response = requests.post('https://crawler.pressupwards.com/', json={
+        response = requests.post('http://localhost:4000/', json={
             'url': url,
             'match': match,
             'maxPagesToCrawl': max_pages_to_crawl,
@@ -14,4 +14,4 @@ def make_api_call(url, match, max_pages_to_crawl, output_file_name):
         print('Error making API call:', error)
 
 # Example usage
-make_api_call('https://example.com', ['example'], 10, 'output.json')
+make_api_call('https://hubspot.com', ['example'], 10, 'output.json')
