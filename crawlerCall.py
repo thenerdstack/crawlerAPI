@@ -14,4 +14,4 @@ def make_api_call(url, match, max_pages_to_crawl, output_file_name):
         print('Error making API call:', error)
 
 # Example usage
-make_api_call('https://hubspot.com', ['example'], 10, 'output.json')
+make_api_call('https://denverpost.com', ['example'], 10, 'output.json')
