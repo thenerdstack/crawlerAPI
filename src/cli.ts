@@ -73,7 +73,7 @@ async function handler(options: Config) {
       };
     }
 
-    await crawl(config);
+    // await crawl(config);
     // await write();
   } catch (error) {
     console.log(error);
