@@ -436,7 +436,6 @@ async function overwriteExistingJsonFiles() {
 // import { glob } from "glob";
 // import { Config, configSchema } from "./config.js";
 // import { Page } from "playwright";
-// import { isWithinTokenLimit } from "gpt-tokenizer";
 // import { createServer } from "http";
 // import express from "express";
 
@@ -496,18 +495,15 @@ async function overwriteExistingJsonFiles() {
 //     // browser controlled by the Playwright library.
 //     const crawler = new PlaywrightCrawler({
 //       // Use the requestHandler to process each of the crawled pages.
-//       async requestHandler({ request, page, log, }) {
+//       async requestHandler({ request, page, log }) {
 //         if (config.cookie) {
 //           // Set the cookie for the specific URL
-
 //           const cookie = {
 //             name: config.cookie.name,
 //             value: config.cookie.value,
 //             url: request.loadedUrl,
 //           };
 //           await page.context().addCookies([cookie]);
-  
-          
 //         }
 
 //         const title = await page.title();
@@ -531,48 +527,14 @@ async function overwriteExistingJsonFiles() {
 //           }
 //         }
 
-//         // const html = await getPageHtml(page, config.selector);
-//         // const finalHtml = { title, url: request.loadedUrl, html }
-
 //         const currentHtml = await getPageHtml(page, config.selector);
 //         html += currentHtml; // Append the current HTML to the html variable
-//         log.info(html)
-
-
-//         // // Save results as JSON to ./storage/datasets/default
-//         // await pushData({ title, url: request.loadedUrl, html });
-
-//         // if (config.onVisitPage) {
-//         //   await config.onVisitPage({ page, pushData });
-//         // }
-
-//         // // Extract links from the current page
-//         // // and add them to the crawling queue.
-//         // await enqueueLinks({
-//         //   globs:
-//         //     typeof config.match === "string" ? [config.match] : config.match,
-//         // });
+//         log.info(html);
 //       },
 //       // Comment this option to scrape the full website.
 //       maxRequestsPerCrawl: config.maxPagesToCrawl,
 //       // Uncomment this option to see the browser window.
 //       // headless: false,
-//       // preNavigationHooks: [
-//       //   // Abort requests for certain resource types
-//       //   async ({ page, log }) => {
-//       //     // If there are no resource exclusions, return
-//       //     const RESOURCE_EXCLUSTIONS = config.resourceExclusions ?? [];
-//       //     if (RESOURCE_EXCLUSTIONS.length === 0) {
-//       //       return;
-//       //     }
-//       //     await page.route(`**\/*.{${RESOURCE_EXCLUSTIONS.join()}}`, (route) =>
-//       //       route.abort("aborted"),
-//       //     );
-//       //     log.info(
-//       //       `Aborting requests for as this is a resource excluded route`,
-//       //     );
-//       //   },
-//       // ],
 //     });
 
 //     const SITEMAP_SUFFIX = "sitemap.xml";
@@ -580,10 +542,10 @@ async function overwriteExistingJsonFiles() {
 
 //     if (isUrlASitemap) {
 //       const listOfUrls = await downloadListOfUrls({ url: config.urls![0] });
-    
+
 //       // Add the initial URLs to the crawling queue.
 //       await crawler.addRequests(listOfUrls);
-    
+
 //       // Run the crawler
 //       await crawler.run(config.urls);
 //     } else if (config.urls && config.urls.length > 0) {
@@ -594,7 +556,7 @@ async function overwriteExistingJsonFiles() {
 //       // Add first URL to the queue and start the crawl.
 //       await crawler.addRequests([config.url]);
 //     }
-    
+
 //     // Run the crawler
 //     await crawler.run();
 //   }
@@ -611,20 +573,17 @@ async function overwriteExistingJsonFiles() {
 //     // Call the crawl function and retrieve the html variable
 //     await crawl(req.body);
 
-//     res.setHeader("Content-Type", "text/plain");
+//     res.setHeader("Content-Type", "application/json");
 
 //     if (html) {
-//       // console.log('it worked')
-//       // console.log(html);
-//       // res.end("it worked");
 //       const response = {
 //         url: req.body.url,
-//         html: html
+//         html: html,
 //       };
-      
+
 //       const jsonResponse = JSON.stringify(response);
-      
-//       res.end(jsonResponse)
+
+//       res.end(jsonResponse);
 //     } else {
 //       res.status(500).send("Empty response");
 //     }
@@ -633,7 +592,6 @@ async function overwriteExistingJsonFiles() {
 //     res.status(500).send("Internal server error");
 //   }
 // });
-
 
 // app.listen(port, () => {
 //   console.log(`Server listening on port ${port}`);
